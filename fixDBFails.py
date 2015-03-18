@@ -1,0 +1,61 @@
+import subprocess
+import sys
+import os
+import argparse
+
+
+def readlist(file):
+  return {line[10:15]:line for line in file}
+
+
+def lookforfails(runs,ofile):
+  grepOutNorm = subprocess.Popen(["grep","-rI","Database exception","logs/"], stdout=subprocess.PIPE)
+  out, err = grepOutNorm.communicate()
+  
+  for line in out.split('\n'): 
+    if len(line) > 1:
+      run = line[5:10]
+
+      runfile = run+".stage1.root"
+      backupfails(runfile)
+
+      ofile.write(runs[run]) #create a new runlist
+
+def backupfails(run):
+
+  backupdir = "failed_runs"
+  run_moved = backupdir+"/"+run
+
+  if not os.path.exists(backupdir):
+    "*** Creating new directory %s" %backupdir
+    os.mkdir(backupdir)
+  
+  if os.path.exists(run):
+    "*** Moving file %s" % run
+    os.rename(run, run_moved) 
+
+def resubmit_runs(runlist):
+  grepOutNorm = subprocess.Popen(["vegas-stage1.pl","--analysis=.",runlist], stdout=subprocess.PIPE)
+  out, err = grepOutNorm.communicate()
+  print out
+
+
+def main():
+
+  parser = argparse.ArgumentParser(description='Fetches runs with DB-related issues and resubmits them.')
+  parser.add_argument('infile', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="Runlist used for running stage1 (with .pl scripts).")
+  args = parser.parse_args()
+  
+  failed_list = "runs_failed.list"
+  outfile = open(failed_list,'w')
+
+  runlist_dict = readlist(args.infile)
+  lookforfails(runlist_dict,outfile)
+
+  outfile.close()
+
+  if (os.stat(failed_list).st_size > 0):
+    resubmit_runs(failed_list)
+
+if __name__ == '__main__':
+  main()
