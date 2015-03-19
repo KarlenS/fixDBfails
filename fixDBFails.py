@@ -9,17 +9,30 @@ def readlist(file):
 
 
 def lookforfails(runs,ofile):
-  grepOutNorm = subprocess.Popen(["grep","-rI","Database exception","logs/"], stdout=subprocess.PIPE)
-  out, err = grepOutNorm.communicate()
+  grepOut1 = subprocess.Popen(["grep","-rI","Database exception","logs/"], stdout=subprocess.PIPE)
+  out1, err = grepOut1.communicate()
   
-  for line in out.split('\n'): 
+  grepOut2 = subprocess.Popen(["grep","-rI","Exception: Database: mysql_real_connect failed","logs/"], stdout=subprocess.PIPE)
+  out2, err = grepOut2.communicate()
+  
+  for line in out1.split('\n'): 
     if len(line) > 1:
       run = line[5:10]
 
       runfile = run+".stage1.root"
-      backupfails(runfile)
+      if os.path.exists(runfile):
+        backupfails(runfile)
+        ofile.write(runs[run]) #create a new runlist
 
-      ofile.write(runs[run]) #create a new runlist
+  for line2 in out2.split('\n'): 
+    if len(line2) > 1:
+      run = line2[5:10]
+
+      runfile = run+".stage1.root"
+      
+      if os.path.exists(runfile):
+        backupfails(runfile)
+        ofile.write(runs[run]) #create a new runlist
 
 def backupfails(run):
 
