@@ -1,2 +1,2 @@
 # fixDBfails
-Little script to catch problems during stage1 of VEGAS analysis associated with database connections and resubmit the affected runs.
+Scripts to catch problems during stage1 and stage4 of VEGAS analysis associated with database connections and other issues.
