@@ -18,7 +18,6 @@ def lookforfails(runs,ofile):
   for line in out1.split('\n'): 
     if len(line) > 1:
       run = line[5:10]
-      print run
 
       runfile = run+".stage4.root"
       if os.path.exists(runfile):
@@ -28,7 +27,6 @@ def lookforfails(runs,ofile):
   for line2 in out2.split('\n'): 
     if len(line2) > 1:
       run = line2[5:10]
-      print run
 
       runfile = run+".stage4.root"
       
